@@ -1,0 +1,159 @@
+<!doctype html>
+<html class="x-admin-sm">
+	<head>
+		<meta charset="UTF-8">
+		<title>智慧水务运维平台</title>
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+		<link rel="stylesheet" href="./css/font.css">
+		<link rel="stylesheet" href="./css/xadmin.css">
+		<link rel="stylesheet" href="./css/theme2.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<script src="./lib/layui/layui.js" charset="utf-8"></script>
+		<script type="text/javascript" src="./js/xadmin.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	</head>
+	<body class="index">
+		<!-- 顶部开始 -->
+		<div class="container">
+			<div class="logo">
+				<a href="./index.html">
+					<img src="images/logo.png" >
+				</a>
+			</div>
+			<a href="javascript;" class="logout">注销登录</a>
+			<div class="welcomeText">
+				欢迎您 正洁环境科技 陈某某！
+			</div>			
+		</div>
+		<!-- 左侧菜单开始 -->
+		<div class="left-nav">
+			<div id="side-nav">
+				<ul id="nav">
+					<li>
+						<ul class="sub-menu" style="display: block;">
+							<li>
+								<a onclick="xadmin.add_tab('信息总览','infoOverview.html')" class="active">
+									<cite>信息总览</cite>
+								</a>
+							</li>
+							<li>
+								<a onclick="xadmin.add_tab('我的审核','myExamine.html')">
+									<cite>我的审核</cite>
+								</a>
+							</li>
+							<li>
+								<a onclick="xadmin.add_tab('分厂运维','branchOverview.html')">
+									<cite>分厂运维</cite>
+								</a>
+							</li>
+							<li>
+								<a onclick="xadmin.add_tab('人员管理','userCenter.html')">
+									<cite>人员管理</cite>
+								</a>
+							</li>							
+						</ul>
+					</li>
+				</ul>
+				<ul style="display: none;">
+					<li>
+						<ul class="sub-menu" style="display: block;">
+							<li>
+								<a onclick="xadmin.add_tab('运行记录','operationRecord.html')" class="active">
+									<cite>运行记录</cite>
+								</a>
+							</li>
+							<li>
+								<a onclick="xadmin.add_tab('日化验记录','dailyAssayRecord.html')">
+									<cite>日化验记录</cite>
+								</a>
+							</li>
+							<li>
+								<a onclick="xadmin.add_tab('审批历史','history.html')">
+									<cite>审批历史</cite>
+								</a>
+							</li>
+						</ul>
+					</li>
+				</ul>				
+			</div>
+		</div>
+		<!-- <div class="x-slide_left"></div> -->
+		<!-- 左侧菜单结束 -->
+		<!-- 右侧主体开始 -->
+		<div class="page-content">
+			<div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+				<ul class="layui-tab-title">
+					<li class="home">
+						<i class="layui-icon">&#xe68e;</i>首页
+					</li>
+				</ul>
+				<div class="layui-unselect layui-form-select layui-form-selected" id="tab_right">
+					<dl>
+						<dd data-type="this">关闭当前</dd>
+						<dd data-type="other">关闭其它</dd>
+						<dd data-type="all">关闭全部</dd>
+					</dl>
+				</div>
+				<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show">
+						<iframe src='./infoOverview.html' frameborder="0" scrolling="yes" class="x-iframe homePage"></iframe>
+					</div>
+				</div>
+				<div id="tab_show">
+				
+				</div>
+			</div>
+		</div>
+		<div class="page-content-bg"></div>
+		<style id="theme_style"></style>
+		<!-- 右侧主体结束 -->
+		<!-- 中部结束 -->
+	</body>
+	<script type="text/javascript">
+		$(function(){
+			// 获取cookie中用户信息
+			// var userMsg = JSON.parse($.cookie('userMsg'))
+			var userMsg = $.cookie('userMsg')
+			if(userMsg != undefined){
+				var msgContent = JSON.parse(userMsg)
+				console.log(msgContent)
+				var realName = msgContent.userName
+				var authority = msgContent.headquartersInfos[0].authority
+				// console.log(realName+authority)
+				if(authority == '总部'){
+                    $('#nav').show().siblings('ul').hide()
+					$('.homePage').attr('src','./infoOverview.html')
+                    $('.welcomeText').html("欢迎您 "+msgContent.headquartersInfos[0].headquartersName+" "+realName+"！")
+				}else{
+                    $('#nav').attr('id','').hide().siblings('ul').attr('id','nav').show()
+                    $('.homePage').attr('src','./operationRecord.html')
+                    $('.welcomeText').html("欢迎您 "+msgContent.headquartersInfos[0].branchInfos[0].branchName+" "+msgContent.headquartersInfos[0].branchInfos[0].userRoles[0]+" "+realName+"！")
+				}
+			}else{
+			    location.replace('../SmartWaterWeb/login.html')
+			}
+			//注销登录
+			$('.logout').on('click',function(e){
+			    e.preventDefault()
+				var userPhone = $.cookie('uMobile')
+                var msgContent = JSON.parse(userMsg)
+                console.log(msgContent)
+                var realName = msgContent.userName
+				unit.getdata('post','api/loginManager/logOut/',{'mobile':userPhone,'name':realName},function(data){
+				    if(data.code == 0){
+                        $.cookie('uMobile',null)
+                        $.cookie('upwd',null)
+                        location.replace('../SmartWaterWeb/login.html')
+					}else{
+				        unit.promptMsg(data.msg)
+					}
+				})
+			})
+		})
+	</script>
+</html>
